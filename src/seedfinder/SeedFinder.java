@@ -1,7 +1,7 @@
 package seedfinder;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.stream.IntStream;
 
 public class SeedFinder {
 	private SeedCollector collector;
@@ -14,18 +14,13 @@ public class SeedFinder {
 
 	public ArrayList<Long> find() {
 		ArrayList<Long> extracted = new ArrayList<Long>();
+		IntStream.range(0,1<<29).parallel().forEach(i->{
+			long[] seeds = collector.getSeed(i);
+			for(long seed:seeds) {
+				if(checker.checkSeed(seed))extracted.add(seed);
+			}
+		});
 
-		for(int b = 0;b<nos;b++) {
-			int bit = b;
-			Arrays.stream(observed.getFixedPos()).forEach(f->{
-				long start = System.currentTimeMillis();
-				long[] candidates = sc.getSeedCandidates(ecbit,f,bit,observed,puzzle);
-				ArrayList<Long> e = checkSeed(candidates,second,third,gb);
-				long end = System.currentTimeMillis();
-				System.out.println((end - start)  + "ms");
-				extracted.addAll(e);
-			});
-		}
 
 
 		return extracted;
