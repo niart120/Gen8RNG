@@ -37,11 +37,17 @@ public class Main {
 		SeedChecker chkr = new SeedChecker(second,third,gb);
 
 		SeedFinder sf = new SeedFinder(clctr, chkr);
+
+
+		long start = System.currentTimeMillis();
 		ArrayList<Long> seedlist = sf.find();
+		long end = System.currentTimeMillis();
+		System.out.println((end - start)/1000.0  + "sec");
 
 		for(Long l: seedlist) {
 			System.out.println(l);
 		}
+
 
 	}
 
