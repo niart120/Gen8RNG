@@ -66,11 +66,23 @@ public class BitMat {
 		return this.w;
 	}
 
-	/**
-	public void set(int h,int w,long value) {
-		this.m[h][w] = value;
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("[");
+		for(int i=0;i<h;i++) {
+			sb.append("[");
+			for(int j=0;j<w;j++) {
+				sb.append(m[i][j]+" ");
+			}
+			sb.deleteCharAt(sb.length()-1);
+			sb.append("]\n");
+
+		}
+		sb.append("]");
+
+		return sb.toString();
 	}
-	**/
 
 	public static BitMat zeros(int h, int w) {
 		return new BitMat(h,w);
@@ -178,7 +190,7 @@ public class BitMat {
 
 		IntStream.range(0, a.h).parallel().forEach(i->{
 			for(int j=0;j<a.w;j++) {
-				mat.m[i][j] = a_m[i][j]|b_m[i][j];
+				mat.m[i][j] = a_m[i][j]^b_m[i][j];
 			}
 		});
 
@@ -203,7 +215,7 @@ public class BitMat {
 		IntStream.range(0,a.h).parallel().forEach(i->{
 			for(int j=0;j<b.w;j++) {
 				for(int k=0;k<b.h;k++) {
-					mat.m[i][j]|=a_m[j][k]&b_m[k][i];
+					mat.m[i][j]^=a_m[i][k]&b_m[k][j];
 				}
 			}
 		});
