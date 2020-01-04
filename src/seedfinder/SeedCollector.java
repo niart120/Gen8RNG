@@ -103,4 +103,13 @@ public class SeedCollector {
 		return bit|tmp;
 	}
 
+	public void updateRevMat(RevMat rev) {
+		this.kernel = rev.kernel;
+		this.emat = rev.emat;
+		this.constant = rev.constant;
+		this.nos = rev.nos;
+		this.swapped = rev.swapped;
+
+	}
+
 }
