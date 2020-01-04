@@ -13,7 +13,9 @@ public class RevMatBuilder {
 	}
 
 	public RevMat build(int ivsReroll) {
+
 		BitMat s = calcS(ivsReroll);
+
 		BitMat s_left = s.sliced(0, s.h(), 0, s.w()/2);
 		BitMat s_right = s.sliced(0, s.h(), s.w()/2, s.w());
 
@@ -32,21 +34,23 @@ public class RevMatBuilder {
 	//Attention:This method has side effect.
 	private long[] getInverse(long[] bitvecs) {
 		long[] emat = new long[bitvecs.length];
+
 		for(int i=0;i<bitvecs.length;i++) {
-			emat[i] = 1<<bitvecs.length-i-1;
+			emat[i] = 1L<<(bitvecs.length-i-1);
 		}
+
 		int pivot = 0;
 		for (int i=0;i<bitvecs.length;i++) {
 			boolean isfound = false;
 	        for (int j=i;j<bitvecs.length;j++) {
 	            if (isfound) {
-	                long check = 1<<(63-i);
+	                long check = 1L<<(63-i);
 	                if ((bitvecs[j]&check)==check) {
 	                    bitvecs[j] ^= bitvecs[pivot];
 	                    emat[j] ^= emat[pivot];
 	                }
 	            }else {
-	                long check = 1<<(63-i);
+	                long check = 1L<<(63-i);
 	                if ((bitvecs[j]&check)==check){
 	                    isfound = true;
 	                    swap(bitvecs,j,pivot);
@@ -66,6 +70,8 @@ public class RevMatBuilder {
 	            }
 	        }
 	    }
+//	    for(long l:bitvecs)System.out.println(String.format("%64s",Long.toBinaryString(l)).replace(' ', '0'));
+
 
 	    return emat;
 
@@ -120,6 +126,7 @@ public class RevMatBuilder {
 
 		//PID,SID,Vfix (2pos);only consume
 		t_ = BitMat.product(t_, t.powers(5));
+		System.out.println(t_);
 		if(ivsReroll>0)t_ = BitMat.product(t_, t.powers(ivsReroll));
 
 		//Vfix(3rdpos)
