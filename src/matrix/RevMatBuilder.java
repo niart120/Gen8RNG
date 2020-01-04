@@ -126,7 +126,6 @@ public class RevMatBuilder {
 
 		//PID,SID,Vfix (2pos);only consume
 		t_ = BitMat.product(t_, t.powers(5));
-		System.out.println(t_);
 		if(ivsReroll>0)t_ = BitMat.product(t_, t.powers(ivsReroll));
 
 		//Vfix(3rdpos)
