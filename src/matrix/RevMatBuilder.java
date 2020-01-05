@@ -71,6 +71,7 @@ public class RevMatBuilder {
 	        }
 	    }
 //	    for(long l:bitvecs)System.out.println(String.format("%64s",Long.toBinaryString(l)).replace(' ', '0'));
+//	    System.out.println();
 
 
 	    return emat;
@@ -78,21 +79,20 @@ public class RevMatBuilder {
 	}
 
 	private void getParametic(long[] eliminated) {
-		long srcpvt = Long.highestOneBit(eliminated.length-1);
-		long tgtpvt = 1<<(62-eliminated.length);
-		long mask = ~(srcpvt|tgtpvt);
-		long pmask = (tgtpvt<<1)-1;
+		long srcpvt = 1<<(64-eliminated.length);
+		long tgtpvt = Long.highestOneBit(eliminated[eliminated.length-1]);
+		long pmask = srcpvt-1;
 
-		int dist = 62-eliminated.length - Long.numberOfTrailingZeros(srcpvt);
+//		System.out.println(Long.toBinaryString(srcpvt));
+
+		int dist = Long.numberOfTrailingZeros(srcpvt) - Long.numberOfTrailingZeros(tgtpvt);
 		if(dist==0)return;
-		for(int i=0;i<eliminated.length;i++) {
-			long srctmp = (eliminated[i]&srcpvt)<<dist;
-			long tgttmp = (eliminated[i]&tgtpvt)>>>dist;
 
-			eliminated[i]&=mask;
-			eliminated[i]|=srctmp|tgttmp;
-			eliminated[i]&=pmask;
+		for(int i=0;i<eliminated.length;i++) {
+			eliminated[i] = bitSwap(eliminated[i],dist,srcpvt,tgtpvt);
+			eliminated[i] &= pmask;
 		}
+		for(long l:eliminated)System.out.println(String.format("%64s",Long.toBinaryString(l)).replace(' ', '0'));
 
 		return;
 	}
@@ -103,7 +103,7 @@ public class RevMatBuilder {
 		for(int i=0;i<constvec.length;i++) {
 			long inner = constvec[i]&seed1;
 			constant<<=1;
-			constant |= isBitOdd(inner);
+			constant |= Long.bitCount(inner)&1L;
 		}
 		return constant;
 	}
@@ -114,6 +114,12 @@ public class RevMatBuilder {
 		arr[j] = tmp;
 	}
 
+	private long bitSwap(long bit, long dist, long srcpos, long tgtpos) {
+		long mask = ~(srcpos|tgtpos);
+		long tmp = (srcpos&bit)>>>dist|(tgtpos&bit)<<dist;
+		bit &= mask;
+		return bit|tmp;
+	}
 
 	private BitMat calcS(int ivsReroll) {
 		BitMat s_upper = BitMat.zeros(0, 128);
@@ -147,16 +153,6 @@ public class RevMatBuilder {
 
 	private BitMat calcSrows(int axis, int length, BitMat trans) {
 		return trans.sliced(axis, axis+length, 0, 128);
-	}
-
-	private long isBitOdd(long l) {
-		l ^= l>>>32;
-		l ^= l>>>16;
-		l ^= l>>>8;
-		l ^= l>>>4;
-	    l ^= l>>>2;
-	    l ^= l>>>1;
-		return l;
 	}
 
 }
