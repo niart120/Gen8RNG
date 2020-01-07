@@ -51,8 +51,8 @@ public class BitMat {
 		IntStream.range(0, h).parallel().forEach(i->{
 			bitvecs[i] = 0;
 			for(int j=0;j<w;j++) {
-				bitvecs[i] |= m[i][j]&1;
 				bitvecs[i]<<=1;
+				bitvecs[i] |= m[i][j]&1;
 			}
 		});
 		return bitvecs;
