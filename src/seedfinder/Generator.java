@@ -55,7 +55,7 @@ public class Generator {
 		    int stat = xor.nextInt(6);
 		    if (ivs[stat] == -1) {
 		        ivs[stat] = 31;
-		        i += 1;
+		        i++;
 		    }
 		}
 		for (i=0;i<6;i++) {
