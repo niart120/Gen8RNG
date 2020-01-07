@@ -21,18 +21,20 @@ public class RevMatBuilder {
 
 		long[] param = s_left.mat2bitvecs();
 		long[] emat = getInverse(param);
-		long swapped = Long.highestOneBit(param[param.length-1]);
-		getParametic(param);
+		long[] swaps = getSwaps(param);
+		getParametic(param,swaps);
 
 		long[] constvec = s_right.mat2bitvecs();
 
 		long constant = getConstant(constvec);
 
-		return new RevMat(param,emat,swapped,constant);
+		return new RevMat(param,emat,swaps,constant);
 	}
 
 	//Attention:This method has side effect.
 	private long[] getInverse(long[] bitvecs) {
+	    for(long l:bitvecs)System.out.println(String.format("%64s",Long.toBinaryString(l)).replace(' ', '0'));
+	    System.out.println();
 		long[] emat = new long[bitvecs.length];
 
 		for(int i=0;i<bitvecs.length;i++) {
@@ -40,9 +42,9 @@ public class RevMatBuilder {
 		}
 
 		int pivot = 0;
-		for (int i=0;i<bitvecs.length;i++) {
+		for (int i=0,k=0;i<64;i++) {
 			boolean isfound = false;
-	        for (int j=i;j<bitvecs.length;j++) {
+	        for (int j=k;j<bitvecs.length;j++) {
 	            if (isfound) {
 	                long check = 1L<<(63-i);
 	                if ((bitvecs[j]&check)==check) {
@@ -58,7 +60,10 @@ public class RevMatBuilder {
 	                }
 	            }
 	        }
-	        if (isfound)pivot++;
+	        if (isfound) {
+	        	pivot++;
+	        	k++;
+	        }
 		}
 
 	    for (int i=bitvecs.length-1;0<=i;i--) {
@@ -78,22 +83,38 @@ public class RevMatBuilder {
 
 	}
 
-	private void getParametic(long[] eliminated) {
-		long srcpvt = 1<<(64-eliminated.length);
-		long tgtpvt = Long.highestOneBit(eliminated[eliminated.length-1]);
-		long pmask = srcpvt-1;
-
-//		System.out.println(Long.toBinaryString(srcpvt));
-
-		int dist = Long.numberOfTrailingZeros(srcpvt) - Long.numberOfTrailingZeros(tgtpvt);
-		if(dist==0)return;
-
-		for(int i=0;i<eliminated.length;i++) {
-			eliminated[i] = bitSwap(eliminated[i],dist,srcpvt,tgtpvt);
-			eliminated[i] &= pmask;
+	private long[] getSwaps(long[] eliminated) {
+		long check = 1L<<63;
+		int i;
+		long[] swaps = new long[0];
+		for(i=0;i<eliminated.length;i++) {
+			if((eliminated[i]&check)!=check) {
+				swaps = new long[eliminated.length-i];
+				for(int j=0;i<eliminated.length;i++,j++) {
+					swaps[j] = Long.highestOneBit(eliminated[i]);
+				}
+				break;
+			}
+			check>>>=1;
 		}
-		for(long l:eliminated)System.out.println(String.format("%64s",Long.toBinaryString(l)).replace(' ', '0'));
+		return swaps;
+	}
 
+	private void getParametic(long[] eliminated,long[] swaps) {
+		for(int s=0;s<swaps.length;s++) {
+			long srcpvt = 1<<(64-eliminated.length+swaps.length-s-1);
+			long tgtpvt = swaps[s];
+
+
+			int dist = Long.numberOfTrailingZeros(srcpvt) - Long.numberOfTrailingZeros(tgtpvt);
+
+			for(int i=0;i<eliminated.length;i++) {
+				eliminated[i] = bitSwap(eliminated[i],dist,srcpvt,tgtpvt);
+			}
+
+		}
+//		for(long l:eliminated)System.out.println(String.format("%64s",Long.toBinaryString(l)).replace(' ', '0'));
+//		System.out.println();
 		return;
 	}
 
@@ -124,7 +145,7 @@ public class RevMatBuilder {
 	private BitMat calcS(int ivsReroll) {
 		BitMat s_upper = BitMat.zeros(0, 128);
 		BitMat s_lower = BitMat.zeros(0, 128);
-		BitMat t_ = t.copies();
+		BitMat t_ = BitMat.identity(128);
 
 		//EC
 		s_upper = BitMat.blockr(s_upper,calcSrows(63,1,t_));

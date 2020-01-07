@@ -14,7 +14,7 @@ public class SeedCollector {
 
 	private long constant;
 	private int nos;
-	private long swapped;
+	private long[] swaps;
 
 	private long ecbit;
 
@@ -26,7 +26,13 @@ public class SeedCollector {
 
 		this.constant = rev.constant;
 		this.nos = rev.nos;
-		this.swapped = rev.swapped;
+		this.swaps = rev.swaps;
+		this.ecbit = ecbit;
+	}
+
+	public SeedCollector(long ecbit, Pokemon observed, Pokemon puzzle) {
+		this.ivs = solveIvsPuzzle(observed,puzzle);
+		this.vfixed = observed.getFixedPos();
 		this.ecbit = ecbit;
 	}
 
@@ -34,7 +40,7 @@ public class SeedCollector {
 		long[] seeds = new long[nos*vfixed.length];
 
 		int paramlen = Long.numberOfTrailingZeros(nos);
-		int dist = Long.numberOfTrailingZeros(nos)-Long.numberOfTrailingZeros(swapped);
+
 		for(int j=0;j<vfixed.length;j++) {
 			long observed = getObservedBit(i,vfixed[j]);
 			long c = observed^constant;
@@ -45,9 +51,8 @@ public class SeedCollector {
 					t |= Long.bitCount(kernel[k]&fixedbit^emat[k]&c)&1L;
 				}
 				t<<=paramlen;
-				t|=fixedbit;
-
-				t = bitSwap(t,dist,nos,swapped);
+				t|=(long)fixedbit;
+				for(int s=0;s<swaps.length;s++) t = bitSwap(t,nos<<(swaps.length-s-1),swaps[s]);
 				seeds[j<<paramlen|fixedbit]=t;
 			}
 		}
@@ -57,7 +62,7 @@ public class SeedCollector {
 	private long getObservedBit(long i,long lastfixed) {
 		long ubit = i;
     	long lbit = 0;
-    	lbit = ubit^this.ecbit&1L;
+    	lbit = (ubit^this.ecbit)&1L;
     	ubit>>>=1;
     	lbit<<=3;
     	lbit |= (lastfixed-ubit)&7L;
@@ -95,7 +100,16 @@ public class SeedCollector {
 		return new long[] {};
 	}
 
+	private long bitSwap(long bit, long srcpos, long tgtpos) {
+		int dist = Long.numberOfTrailingZeros(srcpos)-Long.numberOfTrailingZeros(tgtpos);
+		long mask = ~(srcpos|tgtpos);
+		long tmp = (srcpos&bit)>>>dist|(tgtpos&bit)<<dist;
+		bit &= mask;
+		return bit|tmp;
+	}
 
+
+	@SuppressWarnings("unused")
 	private long bitSwap(long bit, long dist, long srcpos, long tgtpos) {
 		long mask = ~(srcpos|tgtpos);
 		long tmp = (srcpos&bit)>>>dist|(tgtpos&bit)<<dist;
@@ -108,7 +122,7 @@ public class SeedCollector {
 		this.emat = rev.emat;
 		this.constant = rev.constant;
 		this.nos = rev.nos;
-		this.swapped = rev.swapped;
+		this.swaps = rev.swaps;
 
 	}
 
