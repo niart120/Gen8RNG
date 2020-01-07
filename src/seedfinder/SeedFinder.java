@@ -14,13 +14,15 @@ public class SeedFinder {
 
 	public ArrayList<Long> find() {
 		ArrayList<Long> extracted = new ArrayList<Long>();
-		IntStream.range(0,1<<29).parallel().forEach(i->{
-
+		IntStream.range(0,1<<28).parallel().forEach(i->{
+//			long start = System.nanoTime();
 			long[] seeds = collector.getSeed(i);
 			//remove distinct
 			for(long seed:seeds) {
 				if(checker.checkSeed(seed))extracted.add(seed);
 			}
+//			long end = System.nanoTime();
+//			System.out.println((end - start)/1000000.0);
 		});
 
 

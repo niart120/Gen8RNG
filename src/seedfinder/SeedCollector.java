@@ -60,18 +60,16 @@ public class SeedCollector {
 	}
 
 	private long getObservedBit(long i,long lastfixed) {
-		long ubit = i;
+		long ubit = i|this.ecbit;
     	long lbit = 0;
-    	lbit = (ubit^this.ecbit)&1L;
-    	ubit>>>=1;
-    	lbit<<=3;
-    	lbit |= (lastfixed-ubit)&7L;
+
+    	lbit |= (lastfixed-i)&7L;
     	for(int j=0;j<ivs.length;j++) {
-    		ubit>>>=5;
+    		i>>>=5;
     		lbit<<=5;
-    		lbit |= (this.ivs[j]-ubit)&31L;
+    		lbit |= (this.ivs[j]-i)&31L;
     	}
-    	return i<<29|lbit;
+    	return ubit<<28|lbit;
 
 	}
 
