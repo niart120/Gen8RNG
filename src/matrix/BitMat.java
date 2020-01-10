@@ -34,8 +34,9 @@ public class BitMat {
 
 	public BitMat powers(int exp) {
 		if(exp<0) throw new IllegalArgumentException();
-		BitMat powered = copy(this);
-		for(int i=1;i<exp;i++)powered = product(powered,this);
+		if(h!=w) throw new UnsupportedOperationException();
+		BitMat powered = identity(h);
+		for(int i=0;i<exp;i++)powered = product(powered,this);
 
 		return powered;
 	}
