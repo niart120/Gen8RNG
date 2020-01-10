@@ -26,6 +26,16 @@ public class Generator {
 		this.xor = xor;
 	}
 
+	public Pokemon genCheck(int frame) {
+		for(int i=0;i<frame;i++)xor.reset();
+		xor.nextVoid(3);
+		generateIVs();
+		generateAbility();
+		generateGender();
+		generateNature();
+		return new Pokemon(ivs,ability,gender,nature);
+	}
+
 	public Pokemon genCheck() {
 		xor.reset();
 		xor.nextVoid(3);
@@ -41,9 +51,9 @@ public class Generator {
 		xor.reset();
 		xor.nextVoid(3);
 		generateIVs();
-//		generateAbility();
-//		generateGender();
-//		generateNature();
+		generateAbility();
+		generateGender();
+		generateNature();
 
 		return new Pokemon(Arrays.copyOf(ivs, ivs.length),ability,gender,nature);
 	}
