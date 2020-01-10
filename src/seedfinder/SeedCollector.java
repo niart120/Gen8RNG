@@ -52,24 +52,31 @@ public class SeedCollector {
 				}
 				t<<=paramlen;
 				t|=(long)fixedbit;
-				for(int s=0;s<swaps.length;s++) t = bitSwap(t,nos<<(swaps.length-s-1),swaps[s]);
+
+				for(int s=swaps.length-1;s>=0;s--) t = bitSwap(t,nos<<(swaps.length-s-1),swaps[s]);
 				seeds[j<<paramlen|fixedbit]=t;
 			}
+//			System.out.println(vfixed[j]);
+//			System.out.println(seeds[j<<paramlen]);
 		}
 		return seeds;
 	}
 
 	private long getObservedBit(long i,long lastfixed) {
-		long ubit = i|this.ecbit;
-    	long lbit = 0;
+		long lbit = i;
 
-    	lbit |= (lastfixed-i)&7L;
+    	long ubit = this.ecbit<<3;
+    	ubit |= (lastfixed-i)&7L;
+    	i>>>=3;
+
     	for(int j=0;j<ivs.length;j++) {
+    		ubit<<=5;
+    		ubit |= (ivs[j]-i)&31L;
     		i>>>=5;
-    		lbit<<=5;
-    		lbit |= (this.ivs[j]-i)&31L;
     	}
-    	return ubit<<28|lbit;
+    	long observed = ubit<<28|lbit;
+//		System.out.println(String.format("%64s",Long.toBinaryString(observed)).replace(' ', '0'));
+    	return observed;
 
 	}
 
@@ -83,8 +90,7 @@ public class SeedCollector {
 		long[] ivs5 = star5.getIvs();
 
 		if(unfixed3.size()==3) {
-			if(unfixed5.stream().anyMatch(i->unfixed3.contains(i)))return new long[] {};
-			int checkpos = (int)(long)unfixed3.get(2);
+			int checkpos = (int)(long)unfixed3.get(2)%8;
 			if(ivs3[checkpos]==31||ivs5[checkpos]!=31)return new long[] {};
 
 			unfixed3.addAll(unfixed5);

@@ -31,10 +31,44 @@ public class RevMatBuilder {
 		return new RevMat(param,emat,swaps,constant);
 	}
 
+	private BitMat calcS(int ivsReroll) {
+		BitMat s_upper = BitMat.zeros(0, 128);
+		BitMat s_lower = BitMat.zeros(0, 128);
+		BitMat t_ = BitMat.identity(128);
+
+		//EC
+		s_upper = BitMat.blockr(s_upper,calcSrows(63,1,t_));
+		s_upper = BitMat.add(s_upper, calcSrows(127,1,t_));
+
+		//PID,SID,Vfix (2pos);only consume
+		t_ = BitMat.product(t_, t.powers(5));
+		if(ivsReroll>0)t_ = BitMat.product(t_, t.powers(ivsReroll));
+
+		//Vfix(3rdpos)
+		s_upper = BitMat.blockr(s_upper,calcSrows(61,3,t_));
+		s_lower = BitMat.blockr(calcSrows(125,3,t_),s_lower);
+		t_ = BitMat.product(t_, t);
+
+		//ivs
+		for(int i=0;i<5;i++) {
+			s_upper = BitMat.blockr(s_upper,calcSrows(59,5,t_));
+			s_lower = BitMat.blockr(calcSrows(123,5,t_),s_lower);
+			t_ = BitMat.product(t_, t);
+		}
+
+		BitMat s = BitMat.blockr(s_upper,s_lower);
+		return s;
+
+	}
+
+	private BitMat calcSrows(int axis, int length, BitMat trans) {
+		return trans.sliced(axis, axis+length, 0, 128);
+	}
+
 	//Attention:This method has side effect.
 	private long[] getInverse(long[] bitvecs) {
-	    for(long l:bitvecs)System.out.println(String.format("%64s",Long.toBinaryString(l)).replace(' ', '0'));
-	    System.out.println();
+//	    for(long l:bitvecs)System.out.println(String.format("%64s",Long.toBinaryString(l)).replace(' ', '0'));
+//	    System.out.println();
 		long[] emat = new long[bitvecs.length];
 
 		for(int i=0;i<bitvecs.length;i++) {
@@ -75,8 +109,6 @@ public class RevMatBuilder {
 	            }
 	        }
 	    }
-//	    for(long l:bitvecs)System.out.println(String.format("%64s",Long.toBinaryString(l)).replace(' ', '0'));
-//	    System.out.println();
 
 
 	    return emat;
@@ -101,6 +133,7 @@ public class RevMatBuilder {
 	}
 
 	private void getParametic(long[] eliminated,long[] swaps) {
+
 		for(int s=0;s<swaps.length;s++) {
 			long srcpvt = 1<<(64-eliminated.length+swaps.length-s-1);
 			long tgtpvt = swaps[s];
@@ -113,8 +146,6 @@ public class RevMatBuilder {
 			}
 
 		}
-//		for(long l:eliminated)System.out.println(String.format("%64s",Long.toBinaryString(l)).replace(' ', '0'));
-//		System.out.println();
 		return;
 	}
 
@@ -140,40 +171,6 @@ public class RevMatBuilder {
 		long tmp = (srcpos&bit)>>>dist|(tgtpos&bit)<<dist;
 		bit &= mask;
 		return bit|tmp;
-	}
-
-	private BitMat calcS(int ivsReroll) {
-		BitMat s_upper = BitMat.zeros(0, 128);
-		BitMat s_lower = BitMat.zeros(0, 128);
-		BitMat t_ = BitMat.identity(128);
-
-		//EC
-		s_upper = BitMat.blockr(s_upper,calcSrows(63,1,t_));
-		s_lower = BitMat.blockr(s_lower,calcSrows(127,1,t_));
-
-		//PID,SID,Vfix (2pos);only consume
-		t_ = BitMat.product(t_, t.powers(5));
-		if(ivsReroll>0)t_ = BitMat.product(t_, t.powers(ivsReroll));
-
-		//Vfix(3rdpos)
-		s_upper = BitMat.blockr(s_upper,calcSrows(61,3,t_));
-		s_lower = BitMat.blockr(s_lower,calcSrows(125,3,t_));
-		t_ = BitMat.product(t_, t);
-
-		//ivs
-		for(int i=0;i<5;i++) {
-			s_upper = BitMat.blockr(s_upper,calcSrows(59,5,t_));
-			s_lower = BitMat.blockr(s_lower,calcSrows(123,5,t_));
-			t_ = BitMat.product(t_, t);
-		}
-
-		BitMat s = BitMat.blockr(s_upper,s_lower);
-		return s;
-
-	}
-
-	private BitMat calcSrows(int axis, int length, BitMat trans) {
-		return trans.sliced(axis, axis+length, 0, 128);
 	}
 
 }
