@@ -5,14 +5,14 @@ public class RevMat {
 	public long[] emat;
 	public long constant;
 
-	public long swapped;
+	public long[] swaps;
 
 	public int nos;
 
-	RevMat(long[] kernel ,long[] emat,long swapped,long constant) {
+	RevMat(long[] kernel ,long[] emat,long[] swaps,long constant) {
 		this.kernel = kernel;
 		this.emat = emat;
-		this.swapped = swapped;
+		this.swaps = swaps;
 		this.constant = constant;
 		this.nos = 1<<(64-kernel.length);
 	}

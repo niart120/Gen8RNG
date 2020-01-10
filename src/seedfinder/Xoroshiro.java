@@ -4,10 +4,11 @@ public class Xoroshiro {
 	private long seed;
 
 	private long seed0;
-	private long seed1;
+	private long seed1 = 0x82A2B175229D6A5BL;
 
 	public Xoroshiro(long seed) {
 		this.seed = seed;
+		this.seed0 = seed;
 	}
 
 	private long rotl(long x, int k) {

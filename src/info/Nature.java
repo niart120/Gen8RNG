@@ -26,6 +26,10 @@ public enum Nature {
 		return natures.stream().filter(x->x.ja.equals(name)).findFirst().get().getNature();
 	}
 
+	public static Nature getById(long id) {
+		return natures.stream().filter(x->x.nature == id).findFirst().get();
+	}
+
 	public long getNature() {
 		return nature;
 	}

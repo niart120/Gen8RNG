@@ -1,54 +1,33 @@
 package seedfinder;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
-
-import matrix.RevMat;
+import java.util.stream.IntStream;
 
 public class SeedFinder {
-	private final SeedCollector sc;
-	private long nos;
+	private SeedCollector collector;
+	private SeedChecker checker;
 
-	public SeedFinder(RevMat rev) {
-		sc = new SeedCollector(rev);
-		nos = rev.nos;
+	public SeedFinder(SeedCollector collector, SeedChecker checker) {
+		this.collector = collector;
+		this.checker = checker;
 	}
 
-	public ArrayList<Long> find(long ecbit, Pokemon observed, Pokemon puzzle, Pokemon second, Pokemon third, GeneratorBuilder gb) {
+	public ArrayList<Long> find() {
 		ArrayList<Long> extracted = new ArrayList<Long>();
+		IntStream.range(0,1<<28).parallel().forEach(i->{
+//			long start = System.nanoTime();
+			long[] seeds = collector.getSeed(i);
+			//remove distinct
+			for(long seed:seeds) {
+				if(checker.checkSeed(seed))extracted.add(seed);
+			}
+//			long end = System.nanoTime();
+//			System.out.println((end - start)/1000000.0);
+		});
 
-		for(int b = 0;b<nos;b++) {
-			int bit = b;
-			Arrays.stream(observed.getFixedPos()).forEach(f->{
-				long start = System.currentTimeMillis();
-				long[] candidates = sc.getSeedCandidates(ecbit,f,bit,observed,puzzle);
-				ArrayList<Long> e = checkSeed(candidates,second,third,gb);
-				long end = System.currentTimeMillis();
-				System.out.println((end - start)  + "ms");
-				extracted.addAll(e);
-			});
-		}
 
 
 		return extracted;
-	}
-
-	private ArrayList<Long> checkSeed(long[] candidates, Pokemon second, Pokemon third, GeneratorBuilder gb) {
-
-		CopyOnWriteArrayList<Long> seeds = new CopyOnWriteArrayList<>();
-
-		Arrays.stream(candidates).parallel().forEach(seed->{
-			Generator g = gb.build(seed);
-			Pokemon secondCheck = g.genCheck();
-			if(secondCheck.equals(second)) {
-				Pokemon thirdCheck = g.genCheck();
-				if(thirdCheck.equals(third))seeds.add(seed);
-			}
-		});
-
-		return (ArrayList<Long>) seeds.stream().collect(Collectors.toList());
 	}
 
 }

@@ -35,12 +35,27 @@ public class Pokemon {
 		if (o instanceof Pokemon) {
 			Pokemon p = (Pokemon)o;
 			if (!Arrays.equals(p.ivs, this.ivs)) return false;
-			return true;
+//			return true;
 //			if (p.ability!=this.ability) return false;
 //			if (p.gender!=this.gender) return false;
-//			return p.nature == this.nature;
+			return p.nature == this.nature;
 		}
 		return false;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("ivs:");
+		for(int i=0;i<ivs.length;i++) {
+			sb.append(ivs[i]+" ");
+		}
+		sb.append('\n');
+		sb.append("abirity:"+ability+'\n');
+		sb.append("gender:"+gender+'\n');
+		sb.append("nature:"+nature+'\n');
+
+		return sb.toString();
 	}
 
 	public long[] getIvs() {
