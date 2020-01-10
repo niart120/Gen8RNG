@@ -1,5 +1,7 @@
 package seedfinder;
 
+import rng.Xoroshiro;
+
 public class GeneratorBuilder {
 	private int fixed;
 	private boolean hasHidden;

@@ -1,4 +1,4 @@
-package seedfinder;
+package rng;
 
 public class Xoroshiro {
 	private long seed;

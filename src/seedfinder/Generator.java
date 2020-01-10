@@ -2,6 +2,8 @@ package seedfinder;
 
 import java.util.Arrays;
 
+import rng.Xoroshiro;
+
 public class Generator {
 	private final int fixed;
 	private final boolean hasHidden;
