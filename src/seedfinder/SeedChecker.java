@@ -32,10 +32,10 @@ public class SeedChecker {
 			Generator g2 = gb2.build(seed+0x82A2B175229D6A5BL);
 			Pokemon thirdCheck = g2.genCheck();
 			if(thirdCheck.equals(third)) {
-				Generator g3 = gb3.build((seed+0x82A2B175229D6A5BL)+0x82A2B175229D6A5BL);
-				Pokemon forthCheck = g3.genCheck();
-				return forthCheck.equals(forth);
-//				return true;
+//				Generator g3 = gb3.build((seed+0x82A2B175229D6A5BL)+0x82A2B175229D6A5BL);
+//				Pokemon forthCheck = g3.genCheck();
+//				return forthCheck.equals(forth);
+				return true;
 			}
 		}
 		return false;
